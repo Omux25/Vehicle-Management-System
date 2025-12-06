@@ -29,7 +29,7 @@ A robust CLI-based fleet management application built in C using **Doubly Linked
     ```
 
 ## 👥 Contributors
-This project was developed by the **EMSI Software Engineering Team**:
+This project was developed as a **2nd-year group project** at **EMSI** by:
 * **Saad El Hadaoui**
 * **Ghali El Kiraa**
 * **Salmane El hjouji (me)**
