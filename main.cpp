@@ -2,7 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <unistd.h>
+
+#ifdef _WIN32
+    #include <windows.h>
+    #define strcasecmp _stricmp
+#else
+    #include <unistd.h>
+    #include <strings.h>
+#endif
 
 typedef struct InfoVehicule{
     char matricule[20];
@@ -189,7 +196,7 @@ void Ajout_vehicule(vehicule **head){
         clear();
         printf("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n");
         printf("|                                          |\n");
-        printf("|            Ajout d'un vehicule           |\n");
+        printf("|             Ajout d'un vehicule          |\n");
         printf("|                                          |\n");
         printf("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n");
         printf("1. Ajout debut\n");
@@ -241,7 +248,7 @@ void modification_vehicule(vehicule *head, char *matricule){
             clear();
             printf("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n");
             printf("|                                          |\n");
-            printf("|           Type de modification           |\n");
+            printf("|            Type de modification          |\n");
             printf("|                                          |\n");
             printf("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n");
             printf("Matricule actuel : %s\n", current->data->matricule);
@@ -294,7 +301,7 @@ void Suppression_Vehicule(vehicule **head){
         clear();
         printf("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n");
         printf("|                                          |\n");
-        printf("|           Type de suppression            |\n");
+        printf("|            Type de suppression           |\n");
         printf("|                                          |\n");
         printf("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n");
         printf("1. Suppression au debut\n");
@@ -416,7 +423,7 @@ vehicule* SupprimerDebut(vehicule *head){
     if (head){
         head->prev = NULL;
     }
-    free(toDelete->data);
+    if(toDelete->data) free(toDelete->data);
     free(toDelete);
     printf("Vehicule supprime avec succes.\n");
     return head;
@@ -428,7 +435,7 @@ vehicule* SupprimerFin(vehicule *head){
         return NULL;
     }
     if (!head->next){
-        free(head->data);
+        if(head->data) free(head->data);
         free(head);
         printf("Vehicule supprime avec succes.\n");
         return NULL;
@@ -439,7 +446,7 @@ vehicule* SupprimerFin(vehicule *head){
     }
     vehicule *toDelete = tmp->next;
     tmp->next = NULL;
-    free(toDelete->data);
+    if(toDelete->data) free(toDelete->data);
     free(toDelete);
     printf("Vehicule supprime avec succes.\n");
     return head;
@@ -460,7 +467,7 @@ vehicule* SupprimerApresVehicule(vehicule *head, char *matricule){
         if (toDelete->next){
             toDelete->next->prev = current;
         }
-        free(toDelete->data);
+        if(toDelete->data) free(toDelete->data);
         free(toDelete);
         printf("Vehicule supprime avec succes.\n");
     } else {
@@ -505,7 +512,7 @@ void Rechercher_Vehicule(vehicule *head){
         clear();
         printf("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n");
         printf("|                                          |\n");
-        printf("|           Recherche de vehicule          |\n");
+        printf("|            Recherche de vehicule         |\n");
         printf("|                                          |\n");
         printf("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n");
         printf("1. Par marque\n");
