@@ -1,9 +1,8 @@
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cctype>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 #include <unistd.h>
-#include <termio.h>
 
 typedef struct InfoVehicule{
     char matricule[20];
@@ -20,6 +19,7 @@ typedef struct Vehicule{
 } vehicule;
 
 void clear();
+void attente();
 void menuPrincipal(vehicule **head);
 void gestionVehicules(vehicule **head);
 void Ajout_vehicule(vehicule **head);
@@ -45,16 +45,23 @@ int main(){
     vehicule *head = NULL;
     menuPrincipal(&head);
     Liberer_liste(head);
-    sleep(2);
     return 0;
 }
 
 void clear() {
-    if (!isatty(STDOUT_FILENO)) return;
-    printf("\033[2J\033[H");
-    fflush(stdout);
+    #ifdef _WIN32
+        system("cls");
+    #else
+        if (!isatty(STDOUT_FILENO)) return;
+        printf("\033[2J\033[H");
+        fflush(stdout);
+    #endif
 }
 
+void attente() {
+    printf("\nAppuyez sur Entree pour continuer...");
+    getchar();
+}
 
 void menuPrincipal(vehicule **head){
     int n;
@@ -69,17 +76,17 @@ void menuPrincipal(vehicule **head){
         printf("2. Quitter\n");
         printf("Choisir une option : ");
         scanf("%d", &n);
+        getchar();
         switch (n){
             case 1:
                 gestionVehicules(head);
                 break;
             case 2:
-                sleep(5);
+                printf("Fermeture du programme...\n");
                 break;
             default:
-                printf("Erreur! options non valable\n");
-                sleep(5);
-                clear();
+                printf("Erreur! Option non valable\n");
+                attente();
                 break;
         }
     } while (n != 2);
@@ -87,7 +94,7 @@ void menuPrincipal(vehicule **head){
 
 void gestionVehicules(vehicule **head){
     int n;
-    while(true){
+    while(1){
         clear();
         printf("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n");
         printf("|                                          |\n");
@@ -111,10 +118,13 @@ void gestionVehicules(vehicule **head){
                 Ajout_vehicule(head);
                 break;
             case 2:
-                char tmpMat[20];
-                printf("Entrez une matricule :");
-                scanf("%s",tmpMat);
-                modification_vehicule(*head,tmpMat);
+                {
+                    char tmpMat[20];
+                    printf("Entrez une matricule : ");
+                    scanf("%19s", tmpMat);
+                    getchar();
+                    modification_vehicule(*head, tmpMat);
+                }
                 break; 
             case 3:
                 Suppression_Vehicule(head);
@@ -124,43 +134,50 @@ void gestionVehicules(vehicule **head){
                 break;
             case 5:
                 Afficher_vehicules(*head);
-                sleep(5);
+                attente();
                 break;   
             case 6:
-                int critere;
-                do
                 {
-                    printf("Choisir le critere de tri (1: Annee, 2: Nombre d'infractions) :");
-                    scanf("%d", &critere);
-                    if (critere != 1 && critere != 2){
-                        printf("Erreur.Option Non Valable.\n");
-                        sleep(5);
-                    }
-                    getchar();
-                } while (critere != 1 && critere != 2);
-                Trier_Vehicules(head, critere);
-                Afficher_vehicules(*head);
-                sleep(5);
+                    int critere;
+                    do {
+                        printf("Choisir le critere de tri (1: Annee, 2: Nombre d'infractions) : ");
+                        scanf("%d", &critere);
+                        getchar();
+                        if (critere != 1 && critere != 2){
+                            printf("Erreur. Option Non Valable.\n");
+                            attente();
+                        }
+                    } while (critere != 1 && critere != 2);
+                    Trier_Vehicules(head, critere);
+                    Afficher_vehicules(*head);
+                    attente();
+                }
                 break;
             case 7:
-                int threshold;
-                printf("Entrez le seuil d'infractions :");
-                scanf("%d", &threshold);
-                Suivi_Infractions(*head, threshold);
-                sleep(5);
+                {
+                    int threshold;
+                    printf("Entrez le seuil d'infractions : ");
+                    scanf("%d", &threshold);
+                    getchar();
+                    Suivi_Infractions(*head, threshold);
+                    attente();
+                }
                 break;
             case 8:
-                char violMat[20];
-                printf("Entrez le matricule du vehicule :");
-                scanf("%s", violMat);
-                Ajouter_Violation(*head, violMat);
-                sleep(5);
+                {
+                    char violMat[20];
+                    printf("Entrez le matricule du vehicule : ");
+                    scanf("%19s", violMat);
+                    getchar();
+                    Ajouter_Violation(*head, violMat);
+                    attente();
+                }
                 break;
             case 9:
                 return;
-                break;
             default:
-                sleep(5);
+                printf("Erreur! Option non valide.\n");
+                attente();
                 break;
         }
     }
@@ -168,11 +185,11 @@ void gestionVehicules(vehicule **head){
 
 void Ajout_vehicule(vehicule **head){
     int n;
-    while(true){
+    while(1){
         clear();
         printf("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n");
         printf("|                                          |\n");
-        printf("|           Ajout d'un vehicule            |\n");
+        printf("|            Ajout d'un vehicule           |\n");
         printf("|                                          |\n");
         printf("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n");
         printf("1. Ajout debut\n");
@@ -185,22 +202,29 @@ void Ajout_vehicule(vehicule **head){
         switch (n){
             case 1:
                 *head = Ajout_debut(*head);
+                printf("Vehicule ajoute avec succes.\n");
+                attente();
                 break;
             case 2:
                 *head = Ajout_fin(*head);
+                printf("Vehicule ajoute avec succes.\n");
+                attente();
                 break;
             case 3:
-                char tmpMat[20];
-                printf("Entrez une matricule :");
-                scanf("%s",tmpMat);
-                *head = Ajout_Apres_Vehicule(*head, tmpMat);
+                {
+                    char tmpMat[20];
+                    printf("Entrez une matricule : ");
+                    scanf("%19s", tmpMat);
+                    getchar();
+                    *head = Ajout_Apres_Vehicule(*head, tmpMat);
+                    attente();
+                }
                 break;
             case 4:
                 return;
-                break;
             default:
                 printf("Erreur! Option non valide.\n");
-                sleep(5);
+                attente();
                 break;
         }
     }
@@ -213,13 +237,14 @@ void modification_vehicule(vehicule *head, char *matricule){
     }
     if (current){
         int n;
-        while(true){
+        while(1){
             clear();
             printf("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n");
             printf("|                                          |\n");
             printf("|           Type de modification           |\n");
             printf("|                                          |\n");
             printf("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n");
+            printf("Matricule actuel : %s\n", current->data->matricule);
             printf("1. Modifier le matricule\n");
             printf("2. Modifier la Marque\n");
             printf("3. Modifier le Modele\n");
@@ -230,39 +255,42 @@ void modification_vehicule(vehicule *head, char *matricule){
             getchar();
             switch (n){
                 case 1:
-                    printf("Entrer le nouvelle matricule :");
+                    printf("Entrer le nouvelle matricule : ");
                     scanf("%19s", current->data->matricule);
+                    getchar();
                     break;
                 case 2:
-                    printf("Entrer la nouvelle marque :");
+                    printf("Entrer la nouvelle marque : ");
                     scanf("%19s", current->data->marque);
+                    getchar();
                     break;
                 case 3:
-                    printf("Entrer le nouveau modele :");
+                    printf("Entrer le nouveau modele : ");
                     scanf("%19s", current->data->modele);
+                    getchar();
                     break;
                 case 4:
-                    printf("Entrer la nouvelle annee :");
+                    printf("Entrer la nouvelle annee : ");
                     scanf("%d", &current->data->annee);
+                    getchar();
                     break;
                 case 5:
                     return;
-                    break;
                 default:
                     printf("Erreur! Option non valide.\n");
-                    sleep(5);
+                    attente();
                     break;
             }
         }
     } else {
         printf("Erreur! Vehicle non trouve.\n");
-        sleep(5);
+        attente();
     }
 }
 
 void Suppression_Vehicule(vehicule **head){
     int n;
-    while(true){
+    while(1){
         clear();
         printf("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n");
         printf("|                                          |\n");
@@ -279,22 +307,27 @@ void Suppression_Vehicule(vehicule **head){
         switch (n){
             case 1:
                 *head = SupprimerDebut(*head);
+                attente();
                 break;
             case 2:
                 *head = SupprimerFin(*head);
+                attente();
                 break;
             case 3:
-                char tmpMat[20];
-                printf("Entrez une matricule :");
-                scanf("%s", tmpMat);
-                *head = SupprimerApresVehicule(*head, tmpMat);
+                {
+                    char tmpMat[20];
+                    printf("Entrez une matricule : ");
+                    scanf("%19s", tmpMat);
+                    getchar();
+                    *head = SupprimerApresVehicule(*head, tmpMat);
+                    attente();
+                }
                 break;
             case 4:
                 return;
-                break;
             default:
                 printf("Erreur! Option non valide.\n");
-                sleep(5);
+                attente();
                 break;
         }
     }
@@ -312,14 +345,18 @@ vehicule *Creer_vehicule(){
         free(newVehicule);
         exit(1);
     }
-    printf("Entrer le matricule :");
-    scanf("%19s",newVehicule->data->matricule);
-    printf("Entrer la marque :");
-    scanf("%19s",newVehicule->data->marque);
-    printf("Entrer le modele :");
-    scanf("%19s",newVehicule->data->modele);
-    printf("Entrer l'annee :");
-    scanf("%d",&newVehicule->data->annee);
+    printf("Entrer le matricule : ");
+    scanf("%19s", newVehicule->data->matricule);
+    getchar();
+    printf("Entrer la marque : ");
+    scanf("%19s", newVehicule->data->marque);
+    getchar();
+    printf("Entrer le modele : ");
+    scanf("%19s", newVehicule->data->modele);
+    getchar();
+    printf("Entrer l'annee : ");
+    scanf("%d", &newVehicule->data->annee);
+    getchar();
     newVehicule->data->nbViolations = 0;
     newVehicule->prev = NULL;
     newVehicule->next = NULL;
@@ -365,7 +402,6 @@ vehicule *Ajout_Apres_Vehicule(vehicule *head, char *matricule){
         current->next = newVehicule;
     } else {
         printf("Erreur! il n'ya pas de vehicule avec ce matricule.\n");
-        sleep(5);
     }
     return head;
 }
@@ -373,7 +409,6 @@ vehicule *Ajout_Apres_Vehicule(vehicule *head, char *matricule){
 vehicule* SupprimerDebut(vehicule *head){
     if (!head){
         printf("Erreur! La liste est vide.\n");
-        sleep(5);
         return NULL;
     }
     vehicule *toDelete = head;
@@ -383,18 +418,19 @@ vehicule* SupprimerDebut(vehicule *head){
     }
     free(toDelete->data);
     free(toDelete);
+    printf("Vehicule supprime avec succes.\n");
     return head;
 }
 
 vehicule* SupprimerFin(vehicule *head){
     if (!head){
         printf("Erreur! La liste est vide.\n");
-        sleep(5);
         return NULL;
     }
     if (!head->next){
         free(head->data);
         free(head);
+        printf("Vehicule supprime avec succes.\n");
         return NULL;
     }
     vehicule *tmp = head;
@@ -405,13 +441,13 @@ vehicule* SupprimerFin(vehicule *head){
     tmp->next = NULL;
     free(toDelete->data);
     free(toDelete);
+    printf("Vehicule supprime avec succes.\n");
     return head;
 }
 
 vehicule* SupprimerApresVehicule(vehicule *head, char *matricule){
     if (!head){
         printf("Erreur! La liste est vide.\n");
-        sleep(5);
         return head;
     }
     vehicule *current = head;
@@ -426,9 +462,9 @@ vehicule* SupprimerApresVehicule(vehicule *head, char *matricule){
         }
         free(toDelete->data);
         free(toDelete);
+        printf("Vehicule supprime avec succes.\n");
     } else {
-        printf("Erreur! vehicule non trouve.\n");
-        sleep(5);
+        printf("Erreur! vehicule non trouve ou pas de vehicule suivant.\n");
     }
     return head;
 }
@@ -436,13 +472,12 @@ vehicule* SupprimerApresVehicule(vehicule *head, char *matricule){
 void Afficher_vehicules(vehicule *head){
     if (!head){
         printf("Erreur! La liste est vide\n");
-        sleep(5);
         return;
     }
-    int i=0;
+    int i=1;
     vehicule *current = head;
     while(current){
-        printf("|------------Vehicule no %d--------------|\n",i++);
+        printf("|------------Vehicule no %d--------------|\n", i);
         printf("Matricule: %s, Marque: %s, Modele: %s, Annee: %d, Infractions: %d\n",
                current->data->matricule,
                current->data->marque,
@@ -459,18 +494,18 @@ void Liberer_liste(vehicule *head){
     while(head){
         vehicule *tmp = head;
         head = head->next;
-        free(tmp->data);
+        if (tmp->data) free(tmp->data);
         free(tmp);
     }
 }
 
 void Rechercher_Vehicule(vehicule *head){
     int n;
-    while(true){
+    while(1){
         clear();
         printf("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n");
         printf("|                                          |\n");
-        printf("|          Recherche de vehicule           |\n");
+        printf("|           Recherche de vehicule          |\n");
         printf("|                                          |\n");
         printf("|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|\n");
         printf("1. Par marque\n");
@@ -484,20 +519,21 @@ void Rechercher_Vehicule(vehicule *head){
         if (n == 5) return;
         if (n < 1 || n > 5){
             printf("Erreur! option non Valide.\n");
-            sleep(5);
+            attente();
             continue;
         }
         if (!head){
             printf("La liste est vide.\n");
-            sleep(5);
+            attente();
             continue;
         }
         vehicule *current = head;
         int found = 0;
         if (n == 1){
             char marque[20];
-            printf("Entrez la marque :");
+            printf("Entrez la marque : ");
             scanf("%19s", marque);
+            getchar();
             while(current){
                 if (strcasecmp(current->data->marque, marque) == 0){
                     printf("|------------Vehicule trouve!--------------|\n");
@@ -514,8 +550,9 @@ void Rechercher_Vehicule(vehicule *head){
             }
         } else if (n == 2){
             char modele[20];
-            printf("Entrez le modele :");
+            printf("Entrez le modele : ");
             scanf("%19s", modele);
+            getchar();
             while(current){
                 if (strcasecmp(current->data->modele, modele) == 0){
                     printf("|------------Vehicule trouve!--------------|\n");
@@ -532,8 +569,9 @@ void Rechercher_Vehicule(vehicule *head){
             }
         } else if (n == 3){
             int annee;
-            printf("Entrez l'annee de fabrication :");
+            printf("Entrez l'annee de fabrication : ");
             scanf("%d", &annee);
+            getchar();
             while(current){
                 if (current->data->annee == annee){
                     printf("|------------Vehicule trouve!--------------|\n");
@@ -551,21 +589,42 @@ void Rechercher_Vehicule(vehicule *head){
         } else if (n == 4){
             char marque[20] = "", modele[20] = "";
             int annee = -1;
-            printf("Entrez la marque (ou appuyez sur Entree pour ignorer) :");
-            getchar();
-            fgets(marque, 20, stdin);
-            marque[strcspn(marque, "\n")] = 0;
-            printf("Entrez le modele (ou appuyez sur Entree pour ignorer) :");
-            fgets(modele, 20, stdin);
-            modele[strcspn(modele, "\n")] = 0;
-            printf("Entrez l'annee (ou -1 pour ignorer) :");
+            char buffer[50];
+            
+            printf("Entrez la marque (ou appuyez sur Entree pour ignorer) : ");
+            fgets(buffer, sizeof(buffer), stdin);
+            if(buffer[0] != '\n') {
+                sscanf(buffer, "%19s", marque);
+            }
+
+            printf("Entrez le modele (ou appuyez sur Entree pour ignorer) : ");
+            fgets(buffer, sizeof(buffer), stdin);
+            if(buffer[0] != '\n') {
+                sscanf(buffer, "%19s", modele);
+            }
+
+            printf("Entrez l'annee (ou -1 pour ignorer) : ");
             scanf("%d", &annee);
+            getchar(); 
+
             while(current){
                 int match = 0;
-                if (marque[0] && strcasecmp(current->data->marque, marque) != 0) match ++;
-                if (modele[0] && strcasecmp(current->data->modele, modele) != 0) match ++;
-                if (annee != -1 && current->data->annee != annee) match ++;
-                if (match == 3){
+                int criteria = 0;
+
+                if (marque[0]) {
+                    criteria++;
+                    if (strcasecmp(current->data->marque, marque) == 0) match++;
+                }
+                if (modele[0]) {
+                    criteria++;
+                    if (strcasecmp(current->data->modele, modele) == 0) match++;
+                }
+                if (annee != -1) {
+                    criteria++;
+                    if (current->data->annee == annee) match++;
+                }
+
+                if (criteria > 0 && match == criteria){
                     printf("|------------Vehicule trouve!--------------|\n");
                     printf("Matricule: %s, Marque: %s, Modele: %s, Annee: %d, Infractions: %d\n",
                            current->data->matricule,
@@ -582,7 +641,7 @@ void Rechercher_Vehicule(vehicule *head){
         if (!found){
             printf("Aucun vehicule trouve.\n");
         }
-        sleep(5);
+        attente();
     }
 }
 
@@ -629,7 +688,7 @@ int compare_annee(const void *a, const void *b){
 int compare_nbViolations(const void *a, const void *b){
     vehicule *va = *(vehicule **)a;
     vehicule *vb = *(vehicule **)b;
-    return va->data->nbViolations - vb->data->nbViolations;
+    return vb->data->nbViolations - va->data->nbViolations; 
 }
 
 void Trier_Vehicules(vehicule **head, int critere) {
@@ -654,10 +713,6 @@ void Trier_Vehicules(vehicule **head, int critere) {
         qsort(array, n, sizeof(vehicule *), compare_annee);
     } else if (critere == 2) {
         qsort(array, n, sizeof(vehicule *), compare_nbViolations);
-    } else {
-        printf("Invalid sorting criterion.\n");
-        free(array);
-        return;
     }
     for (int i = 0; i < n; i++) {
         if (i > 0) {
