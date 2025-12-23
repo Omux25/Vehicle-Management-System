@@ -16,7 +16,7 @@ A robust CLI-based fleet management application built in C using **Doubly Linked
 ## 🚀 How to Run
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/Omux25/vehicle-management-system.git](https://github.com/Omux25/vehicle-management-system.git)
+    git clone https://github.com/Omux25/vehicle-management-system.git
     cd vehicle-management-system
     ```
 2.  **Compile the code (GCC):**
